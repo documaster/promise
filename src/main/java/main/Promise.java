@@ -23,8 +23,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -132,6 +134,34 @@ public class Promise {
 		CompletableFuture<Void> result = new CompletableFuture<>();
 		delayer.schedule(() -> result.complete(null), timeout, unit);
 		return result;
+	}
+
+	public static <T> void runUntil(Supplier<T> method, long timeout, TimeUnit unit,
+			ScheduledExecutorService scheduler) {
+
+		scheduler.scheduleAtFixedRate(() -> {
+
+			T returnVal = method.get();
+			if (returnVal != null) {
+
+				scheduler.shutdown();
+			}
+
+		}, timeout, timeout, unit);
+	}
+
+	public static <T> void runAtMostUntil(Supplier<T> method, long untilTimeout, long atMostTimeout, TimeUnit unit,
+			ScheduledExecutorService scheduler) {
+
+		CompletableFuture.runAsync(() -> runUntil(method, untilTimeout, unit, scheduler));
+
+		ScheduledExecutorService sched = new ScheduledThreadPoolExecutor(1);
+		sched.schedule(() -> {
+
+			// Shutdown the #runUntil scheduler after some delay
+			scheduler.shutdown();
+
+		}, atMostTimeout, unit);
 	}
 
 	@SafeVarargs
