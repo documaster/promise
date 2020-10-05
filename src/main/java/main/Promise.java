@@ -129,10 +129,44 @@ public class Promise {
 		});
 	}
 
+	/**
+	 * Delay any future by a given timeout. After the given timeout, the future shall be execute any other chain that
+	 * has been put to it.
+	 * @param timeout
+	 * Time to wait before running the next {@link CompletableFuture} method.
+	 * @param unit
+	 * Time in terms of units.
+	 * @param delayer
+	 * A {@link ScheduledExecutorService} that controls the delaying functionality.
+	 * @return
+	 * The {@link CompletableFuture} that can be used to chain additional methods after the delay.
+	 */
 	public static CompletableFuture<Void> delay(long timeout, TimeUnit unit, ScheduledExecutorService delayer) {
 
 		CompletableFuture<Void> result = new CompletableFuture<>();
 		delayer.schedule(() -> result.complete(null), timeout, unit);
+		return result;
+	}
+
+	/**
+	 * Delay any function by a given timeout. After the given timeout, the function shall be executed. Any other
+	 * functions can be chained after the initial delay, since this returns a {@link CompletableFuture}.
+	 * @param fn
+	 * The function to execute with a delay.
+	 * @param timeout
+	 * Time to wait before running the function.
+	 * @param unit
+	 * Time in terms of units.
+	 * @param delayer
+	 * A {@link ScheduledExecutorService} that controls the delaying functionality.
+	 * @return
+	 * The {@link CompletableFuture} that can be used to chain additional methods after the function delay.
+	 */
+	public static <T> CompletableFuture<T> delay(Supplier<T> fn, long timeout, TimeUnit unit,
+			ScheduledExecutorService delayer) {
+
+		CompletableFuture<T> result = new CompletableFuture<>();
+		delayer.schedule(() -> result.complete(fn.get()), timeout, unit);
 		return result;
 	}
 
