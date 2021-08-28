@@ -85,6 +85,18 @@ public class Promise {
 	}
 
 	/**
+	 * Execute the passed supplier asynchronously.
+	 *
+	 * @param supplier The function to execute
+	 * @param <T> Return type of the function
+	 * @return A {@link CompletableFuture} that contains the result of the supplied function
+	 */
+	public static <T> CompletableFuture<T> of(Supplier<T> supplier) {
+
+		return CompletableFuture.supplyAsync(supplier);
+	}
+
+	/**
 	 * Retry a CompletableFuture returned by a supplier until it completes with no exception or the maximum number of
 	 * retries is reached.
 	 *
@@ -327,6 +339,51 @@ public class Promise {
 
 		return action.apply(itr.next())
 				.thenCompose(result -> doSequentially(itr, action, accumulator.apply(initialVal, result), accumulator));
+	}
+
+	/**
+	 * Execute the supplied functions first, the run the last function with the results from the two passed to it.
+	 *
+	 * Both actions shall be executed in parallel. Both have to finish before the last function can be executed.
+	 *
+	 * @param action1 The first function to execute
+	 * @param action2 The second function to execute
+	 * @param functionToRunAfterActions Function to run after action1 and action2 to finish. Their results are passed
+	 *                                    to this function as parameters
+	 * @param <T> The resulting type the {@link CompletableFuture} will hold
+	 * @return A {@link CompletableFuture} that contains the result of the last function
+	 */
+	public static <T> CompletableFuture<T> runBothThenApply(
+			Supplier<T> action1,
+			Supplier<T> action2,
+			BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
+
+		System.out.println("in the promise");
+		return allOf(Promise.of(action1), Promise.of(action2))
+				// We are implicitly guaranteed that the actions cannot be less (or more) than 2, thus avoiding IOOB Ex
+				.thenApply(actions -> functionToRunAfterActions.apply(actions.get(0), actions.get(1)).join());
+	}
+
+	/**
+	 * Execute the supplied futures first, the run the last function with the results from the two futures passed to it.
+	 *
+	 * Both futures shall be executed in parallel. Both have to finish before the last function can be executed.
+	 *
+	 * @param future1 The first future to execute
+	 * @param future2 The second future to execute
+	 * @param functionToRunAfterActions Function to run after action1 and action2 to finish. Their results are passed
+	 *                                  to this function as parameters
+	 * @param <T> The resulting type the {@link CompletableFuture} will hold
+	 * @return A {@link CompletableFuture} that contains the result of the last function
+	 */
+	public static <T> CompletableFuture<T> runBothThenApply(
+			CompletableFuture<T> future1,
+			CompletableFuture<T> future2,
+			BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
+
+		return allOf(future1, future2)
+				// We are implicitly guaranteed that the actions cannot be less (or more) than 2, thus avoiding IOOB Ex
+				.thenApply(results -> functionToRunAfterActions.apply(results.get(0), results.get(1)).join());
 	}
 
 	/**
