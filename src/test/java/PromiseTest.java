@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import main.Promise;
@@ -43,11 +44,7 @@ public class PromiseTest {
 
 			return CompletableFuture.supplyAsync(() -> {
 
-				try {
-					Thread.sleep(sleepMs);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
+				sleep(sleepMs);
 
 				numFails[0] += 1;
 				throw new RuntimeException("Failed!!!11");
@@ -203,5 +200,64 @@ public class PromiseTest {
 
 		assertTrue(delay.isDone());
 		assertEquals(delay.get(), delayCounter);
+	}
+
+	@Test
+	public void runBothThenApply() throws Exception {
+
+		AtomicInteger sum = new AtomicInteger(0);
+
+		Supplier<Integer> supplier1 = () -> { sleep(500); return 100; };
+		Supplier<Integer> supplier2 = () -> { sleep(500); return 100; };
+
+		CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(supplier1);
+		CompletableFuture<Integer> future2 = CompletableFuture.supplyAsync(supplier2);
+
+		CompletableFuture<Integer> intResult = Promise.runBothThenApply(
+				future1,
+				future2,
+				(int1, int2) -> CompletableFuture.supplyAsync(() -> sum.updateAndGet((dummy) -> int1 + int2)));
+
+		assertFalse(intResult.isDone());
+		assertEquals(0, sum.get());
+
+		Thread.sleep(1000);
+
+		assertTrue(intResult.isDone());
+		assertEquals(200, intResult.join().intValue());
+	}
+
+	@Test
+	public void runBothSuppliersThenApply() throws Exception {
+
+		AtomicInteger sum = new AtomicInteger(0);
+
+		Supplier<Integer> supplier1 = () -> { sleep(500); return 100; };
+		Supplier<Integer> supplier2 = () -> { sleep(500); return 100; };
+
+		CompletableFuture<Integer> intResult = Promise.runBothThenApply(
+				supplier1,
+				supplier2,
+				(int1, int2) -> CompletableFuture.supplyAsync(() -> sum.updateAndGet((dummy) -> int1 + int2)));
+
+		assertFalse(intResult.isDone());
+		assertEquals(0, sum.get());
+
+		Thread.sleep(1000);
+
+		assertTrue(intResult.isDone());
+		assertEquals(200, intResult.join().intValue());
+	}
+
+	private void sleep(long millis) {
+
+		try {
+
+			Thread.sleep(millis);
+
+		} catch (InterruptedException e) {
+
+			throw new RuntimeException(e);
+		}
 	}
 }
