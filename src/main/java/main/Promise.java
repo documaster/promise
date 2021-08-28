@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -58,7 +57,7 @@ public class Promise {
 
 	public static <T> CompletableFuture<T> fail(Throwable e) {
 
-		CompletableFuture<T> cf = new CompletableFuture<T>();
+		CompletableFuture<T> cf = new CompletableFuture<>();
 		cf.completeExceptionally(e);
 		return cf;
 	}
@@ -396,23 +395,23 @@ public class Promise {
 	 */
 	public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier, ProxyExecutor executorService) {
 
-		CompletableFuture<T> retval = new CompletableFuture<>();
+		CompletableFuture<T> retVal = new CompletableFuture<>();
 
 		executorService.submit(() -> {
 
 			try {
 
-				retval.complete(supplier.get());
+				retVal.complete(supplier.get());
 
 			} catch (Exception e) {
 
-				retval.completeExceptionally(e);
+				retVal.completeExceptionally(e);
 			}
 
 			return null;
 		});
 
-		return retval;
+		return retVal;
 	}
 
 	public static CompletableFuture<Void> supplyAsync(Procedure proc, ProxyExecutor executorService) {
