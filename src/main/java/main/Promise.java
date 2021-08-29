@@ -63,6 +63,22 @@ public class Promise {
 	}
 
 	/**
+	 * Convenience method to run futures in the same chain without needing a return value.
+	 *
+	 * This is the same as invoking <code>CompletableFuture.runAsync(() -> actionToRun())</code>, but with the
+	 * difference that this method will run the action using the calling thread instead of invoking explicitly a
+	 * separate asynchronous call.
+	 *
+	 * @param actionToRun Action to run
+	 * @param <T> Return type of the supplied action
+	 * @return A {@link CompletableFuture<Void>}<{@link Void}>
+	 */
+	public static <T> CompletableFuture<Void> run(CompletableFuture<T> actionToRun) {
+
+		return actionToRun.thenRun(() -> Promise.none());
+	}
+
+	/**
 	 * Wrap a function returning a CompletableFuture so that any exceptions thrown will get properly propagated as a
 	 * failed future to users of this function. That way users of the function will not have to handle both exceptions
 	 * with regular try-catch logic and handle a failed future.
