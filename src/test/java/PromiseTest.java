@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PromiseTest {
@@ -247,6 +248,15 @@ public class PromiseTest {
 
 		assertTrue(intResult.isDone());
 		assertEquals(200, intResult.join().intValue());
+	}
+
+	@Test
+	public void throwNPE() throws Throwable {
+
+		assertThrows(NullPointerException.class, () -> {
+
+			Promise.runUntil(null, 1000, null, null);
+		});
 	}
 
 	private void sleep(long millis) {
