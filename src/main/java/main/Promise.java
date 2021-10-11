@@ -33,6 +33,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.NotNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +75,7 @@ public class Promise {
 	 * @param <T> Return type of the supplied action
 	 * @return A {@link CompletableFuture<Void>}<{@link Void}>
 	 */
-	public static <T> CompletableFuture<Void> run(CompletableFuture<T> actionToRun) {
+	public static <T> CompletableFuture<Void> run(@NotNull CompletableFuture<T> actionToRun) {
 
 		if (actionToRun == null)
 			throw new NullPointerException("Action meant to run must not be null");
@@ -90,7 +92,7 @@ public class Promise {
 	 * normally, and will complete exceptionally when the future returned is completed exceptionally OR the supplier
 	 * generates an exception.
 	 */
-	public static <T> CompletableFuture<T> wrapFuture(Supplier<CompletableFuture<T>> supplier) {
+	public static <T> CompletableFuture<T> wrapFuture(@NotNull Supplier<CompletableFuture<T>> supplier) {
 
 		if (supplier == null)
 			throw new NullPointerException("Function to get must not be null");
@@ -126,7 +128,8 @@ public class Promise {
 	 * completed exceptionally numRetries times and will complete with the result of the future returned by the
 	 * promiseSupplier otherwise
 	 */
-	public static <T> CompletableFuture<T> retry(Supplier<CompletableFuture<T>> promiseSupplier, int numRetries) {
+	public static <T> CompletableFuture<T> retry(
+			@NotNull Supplier<CompletableFuture<T>> promiseSupplier, int numRetries) {
 
 		if (promiseSupplier == null)
 			throw new NullPointerException("Supplied promise function must not be null");
@@ -172,7 +175,8 @@ public class Promise {
 	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality. Cannot be null
 	 * @return The {@link CompletableFuture} that can be used to chain additional methods after the delay
 	 */
-	public static CompletableFuture<Void> delay(long timeout, TimeUnit unit, ScheduledExecutorService delayer) {
+	public static CompletableFuture<Void> delay(
+			long timeout, @NotNull TimeUnit unit, @NotNull ScheduledExecutorService delayer) {
 
 		if (delayer == null)
 			throw new NullPointerException("Delayer must not be null");
@@ -194,8 +198,8 @@ public class Promise {
 	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality. Cannot be null
 	 * @return The {@link CompletableFuture} that can be used to chain additional methods after the function delay
 	 */
-	public static <T> CompletableFuture<T> delay(Supplier<T> fn, long timeout, TimeUnit unit,
-			ScheduledExecutorService delayer) {
+	public static <T> CompletableFuture<T> delay(
+			@NotNull Supplier<T> fn, long timeout, @NotNull TimeUnit unit, @NotNull ScheduledExecutorService delayer) {
 
 		if (fn == null)
 			throw new NullPointerException("Function must not be null");
@@ -210,7 +214,7 @@ public class Promise {
 	}
 
 	public static <T> void runUntil(
-			Supplier<T> method, long timeout, TimeUnit unit, ScheduledExecutorService scheduler) {
+			Supplier<T> method, long timeout, @NotNull TimeUnit unit, @NotNull ScheduledExecutorService scheduler) {
 
 		if (scheduler == null)
 			throw new NullPointerException("Scheduler must not be null");
@@ -228,8 +232,8 @@ public class Promise {
 		}, timeout, timeout, unit);
 	}
 
-	public static <T> void runAtMostUntil(Supplier<T> method, long untilTimeout, long atMostTimeout, TimeUnit unit,
-			ScheduledExecutorService scheduler) {
+	public static <T> void runAtMostUntil(Supplier<T> method, long untilTimeout, long atMostTimeout,
+										  @NotNull TimeUnit unit, @NotNull ScheduledExecutorService scheduler) {
 
 		CompletableFuture.runAsync(() -> runUntil(method, untilTimeout, unit, scheduler));
 
@@ -243,12 +247,12 @@ public class Promise {
 	}
 
 	@SafeVarargs
-	public static <T> CompletableFuture<List<T>> allOf(CompletableFuture<T>... futures) {
+	public static <T> CompletableFuture<List<T>> allOf(@NotNull CompletableFuture<T>... futures) {
 
 		return allOf(Arrays.asList(futures));
 	}
 
-	public static <T> CompletableFuture<List<T>> allOf(Collection<CompletableFuture<T>> futures) {
+	public static <T> CompletableFuture<List<T>> allOf(@NotNull Collection<CompletableFuture<T>> futures) {
 
 		if (futures == null)
 			throw new NullPointerException("Supplied futures must not be null");
@@ -301,7 +305,7 @@ public class Promise {
 			return this;
 		}
 
-		public final <T> FuturesListBuilder add(CompletableFuture<T>... futures) {
+		public final <T> FuturesListBuilder add(@NotNull CompletableFuture<T>... futures) {
 
 			return add(Arrays.asList(futures));
 		}
@@ -323,7 +327,7 @@ public class Promise {
 	 * provided action. CompletableFuture<Void> is returned, regardless of the type returned by the iterator function
 	 */
 	public static <T, V> CompletableFuture<Void> doSequentially(
-			Iterator<T> itr, Function<T, CompletableFuture<V>> action) {
+			@NotNull Iterator<T> itr, @NotNull Function<T, CompletableFuture<V>> action) {
 
 		if (itr == null)
 			throw new NullPointerException("Iterator must not be null");
@@ -356,8 +360,8 @@ public class Promise {
 	 * @return The accumulated value
 	 */
 	public static <T, U, V> CompletableFuture<V> doSequentially(
-			Iterator<T> itr,
-			Function<T, CompletableFuture<U>> action,
+			@NotNull Iterator<T> itr,
+			@NotNull Function<T, CompletableFuture<U>> action,
 			V initialVal,
 			BiFunction<V, U, V> accumulator) {
 
@@ -388,9 +392,9 @@ public class Promise {
 	 * @return A {@link CompletableFuture} that contains the result of the last function
 	 */
 	public static <T> CompletableFuture<T> runBothThenApply(
-			Supplier<T> action1,
-			Supplier<T> action2,
-			BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
+			@NotNull Supplier<T> action1,
+			@NotNull Supplier<T> action2,
+			@NotNull BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
 
 		if (action1 == null || action2 == null)
 			throw new NullPointerException("Actions must not be null");
@@ -415,9 +419,9 @@ public class Promise {
 	 * @return A {@link CompletableFuture} that contains the result of the last function
 	 */
 	public static <T> CompletableFuture<T> runBothThenApply(
-			CompletableFuture<T> future1,
-			CompletableFuture<T> future2,
-			BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
+			@NotNull CompletableFuture<T> future1,
+			@NotNull CompletableFuture<T> future2,
+			@NotNull BiFunction<T, T, CompletableFuture<T>> functionToRunAfterActions) {
 
 		if (future1 == null || future2 == null)
 			throw new NullPointerException("Futures must not be null");
@@ -437,7 +441,8 @@ public class Promise {
 	 * @param <T> The type of value provided by the supplier
 	 * @return A CompletableFuture which will be resolved with the value provided by executing the supplier
 	 */
-	public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier, ProxyExecutor executorService) {
+	public static <T> CompletableFuture<T> supplyAsync(
+			@NotNull Supplier<T> supplier, @NotNull ProxyExecutor executorService) {
 
 		if (supplier == null)
 			throw new NullPointerException("Supplier must not be null");
@@ -463,7 +468,7 @@ public class Promise {
 		return retVal;
 	}
 
-	public static CompletableFuture<Void> supplyAsync(Procedure proc, ProxyExecutor executorService) {
+	public static CompletableFuture<Void> supplyAsync(@NotNull Procedure proc, ProxyExecutor executorService) {
 
 		if (proc == null)
 			throw new NullPointerException("Procedure must not be null");
