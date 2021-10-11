@@ -71,7 +71,7 @@ public class Promise {
 	 * difference that this method will run the action using the calling thread instead of invoking explicitly a
 	 * separate asynchronous call.
 	 *
-	 * @param actionToRun Action to run. Cannot be null
+	 * @param actionToRun Action to run
 	 * @param <T> Return type of the supplied action
 	 * @return A {@link CompletableFuture<Void>}<{@link Void}>
 	 */
@@ -87,7 +87,7 @@ public class Promise {
 	 * failed future to users of this function. That way users of the function will not have to handle both exceptions
 	 * with regular try-catch logic and handle a failed future.
 	 *
-	 * @param supplier The function returning a CompletableFuture which we want to wrap. Cannot be null
+	 * @param supplier The function returning a CompletableFuture which we want to wrap
 	 * @return A CompletableFuture that will complete normally when the future returned by the supplier completes
 	 * normally, and will complete exceptionally when the future returned is completed exceptionally OR the supplier
 	 * generates an exception.
@@ -120,8 +120,7 @@ public class Promise {
 	 * Retry a CompletableFuture returned by a supplier until it completes with no exception or the maximum number of
 	 * retries is reached.
 	 *
-	 * @param promiseSupplier A function responsible for constructing the CompletableFuture that will be retried.
-	 *                           Cannot be null
+	 * @param promiseSupplier A function responsible for constructing the CompletableFuture that will be retried
 	 * @param numRetries The maximum number of times to try obtaining and executing a promise returned by the
 	 *                      promiseSupplier
 	 * @return A CompletableFuture that will complete exceptionally if the future returned by the promiseSupplier has
@@ -171,8 +170,8 @@ public class Promise {
 	 * has been put to it.
 	 *
 	 * @param timeout Time to wait before running the next {@link CompletableFuture} method
-	 * @param unit Time in terms of units. Cannot be null
-	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality. Cannot be null
+	 * @param unit Time in terms of units
+	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality
 	 * @return The {@link CompletableFuture} that can be used to chain additional methods after the delay
 	 */
 	public static CompletableFuture<Void> delay(
@@ -192,10 +191,10 @@ public class Promise {
 	 * Delay any function by a given timeout. After the given timeout, the function shall be executed. Any other
 	 * functions can be chained after the initial delay, since this returns a {@link CompletableFuture}.
 	 *
-	 * @param fn The function to execute with a delay. Cannot be null
+	 * @param fn The function to execute with a delay
 	 * @param timeout Time to wait before running the function
-	 * @param unit Time in terms of units. Cannot be null
-	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality. Cannot be null
+	 * @param unit Time in terms of units
+	 * @param delayer A {@link ScheduledExecutorService} that controls the delaying functionality
 	 * @return The {@link CompletableFuture} that can be used to chain additional methods after the function delay
 	 */
 	public static <T> CompletableFuture<T> delay(
@@ -247,7 +246,7 @@ public class Promise {
 	}
 
 	@SafeVarargs
-	public static <T> CompletableFuture<List<T>> allOf(@NotNull CompletableFuture<T>... futures) {
+	public static <T> CompletableFuture<List<T>> allOf(CompletableFuture<T>... futures) {
 
 		return allOf(Arrays.asList(futures));
 	}
@@ -305,7 +304,7 @@ public class Promise {
 			return this;
 		}
 
-		public final <T> FuturesListBuilder add(@NotNull CompletableFuture<T>... futures) {
+		public final <T> FuturesListBuilder add(CompletableFuture<T>... futures) {
 
 			return add(Arrays.asList(futures));
 		}
@@ -319,8 +318,8 @@ public class Promise {
 	/**
 	 * Sequentially apply an action to several items.
 	 *
-	 * @param itr Iterator that returns the items to process. Cannot be null
-	 * @param action Action to apply to each element. Cannot be null
+	 * @param itr Iterator that returns the items to process
+	 * @param action Action to apply to each element
 	 * @param <T> Type of each item to process
 	 * @param <V> Type of the CompletableFuture returned by the action
 	 * @return A promise that will be fulfilled when each item returned by the iterator has been processed by the
@@ -345,8 +344,8 @@ public class Promise {
 	/**
 	 * Sequentially apply an action to several items and accumulate the results of each action execution.
 	 *
-	 * @param itr Iterator that returns the items to process. Cannot be null
-	 * @param action Action to apply to each element. Cannot be null
+	 * @param itr Iterator that returns the items to process
+	 * @param action Action to apply to each element
 	 * @param initialVal The initial value passed into the accumulator function
 	 * @param accumulator Function that should accumulate/combine successive results return from each action.
 	 *                    The first argument passed each time will be the value returned by the accumulator from
@@ -384,10 +383,10 @@ public class Promise {
 	 *
 	 * Both actions shall be executed in parallel. Both have to finish before the last function can be executed.
 	 *
-	 * @param action1 The first function to execute. Cannot be null
-	 * @param action2 The second function to execute. Cannot be null
+	 * @param action1 The first function to execute
+	 * @param action2 The second function to execute
 	 * @param functionToRunAfterActions Function to run after action1 and action2 to finish. Their results are passed
-	 *                                  to this function as parameters. Cannot be null
+	 *                                  to this function as parameters
 	 * @param <T> The resulting type the {@link CompletableFuture} will hold
 	 * @return A {@link CompletableFuture} that contains the result of the last function
 	 */
@@ -411,10 +410,10 @@ public class Promise {
 	 *
 	 * Both futures shall be executed in parallel. Both have to finish before the last function can be executed.
 	 *
-	 * @param future1 The first future to execute. Cannot be null
-	 * @param future2 The second future to execute. Cannot be null
+	 * @param future1 The first future to execute
+	 * @param future2 The second future to execute
 	 * @param functionToRunAfterActions Function to run after action1 and action2 to finish. Their results are passed
-	 *                                  to this function as parameters. Cannot be null
+	 *                                  to this function as parameters.
 	 * @param <T> The resulting type the {@link CompletableFuture} will hold
 	 * @return A {@link CompletableFuture} that contains the result of the last function
 	 */
@@ -436,8 +435,8 @@ public class Promise {
 	/**
 	 * Asynchronously execute the given supplier utilizing the provided executorService.
 	 *
-	 * @param supplier A supplier function the user wishes to execute asynchronously. Cannot be null
-	 * @param executorService The ProxyExecutor to utilize. Cannot be null
+	 * @param supplier A supplier function the user wishes to execute asynchronously
+	 * @param executorService The ProxyExecutor to utilize
 	 * @param <T> The type of value provided by the supplier
 	 * @return A CompletableFuture which will be resolved with the value provided by executing the supplier
 	 */
