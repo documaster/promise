@@ -32,13 +32,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Promise {
+public class Promise<T> extends CompletableFuture<T> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Promise.class);
 
@@ -245,12 +244,6 @@ public class Promise {
 		}, atMostTimeout, unit);
 	}
 
-	@SafeVarargs
-	public static <T> CompletableFuture<List<T>> allOf(CompletableFuture<T>... futures) {
-
-		return allOf(Arrays.asList(futures));
-	}
-
 	public static <T> CompletableFuture<List<T>> allOf(@NotNull Collection<CompletableFuture<T>> futures) {
 
 		if (futures == null)
@@ -400,7 +393,7 @@ public class Promise {
 		if (functionToRunAfterActions == null)
 			throw new NullPointerException("Function must not be null");
 
-		return allOf(Promise.of(action1), Promise.of(action2))
+		return allOf(Arrays.asList(Promise.of(action1), Promise.of(action2)))
 				// We are implicitly guaranteed that the actions cannot be less (or more) than 2, thus avoiding IOOB Ex
 				.thenApply(actions -> functionToRunAfterActions.apply(actions.get(0), actions.get(1)).join());
 	}
@@ -427,7 +420,7 @@ public class Promise {
 		if (functionToRunAfterActions == null)
 			throw new NullPointerException("Function must not be null");
 
-		return allOf(future1, future2)
+		return allOf(Arrays.asList(future1, future2))
 				// We are implicitly guaranteed that the actions cannot be less (or more) than 2, thus avoiding IOOB Ex
 				.thenApply(results -> functionToRunAfterActions.apply(results.get(0), results.get(1)).join());
 	}
