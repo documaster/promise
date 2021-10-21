@@ -85,6 +85,21 @@ public class Promise<T> extends CompletableFuture<T> {
 	}
 
 	/**
+	 * Chain the following supplied action to the previous completion stage and return its result. The result of the
+	 * previous completion shall be ignored and only the actions result shall be returned. If the supplied action
+	 * throws an exception, then the chain completes exceptionally as well.
+	 *
+	 * @param action The action to run after this completion stage
+	 * @return A future result of the supplied action
+	 */
+	public CompletableFuture<T> thenObtain(@NotNull Supplier<T> action) {
+
+		if (action == null)
+			throw new NullPointerException("Action must not be null");
+		return this.thenApply(throwAway -> action.get());
+	}
+
+	/**
 	 * Convenience method to run futures in the same chain without needing a return value.
 	 *
 	 * This is the same as invoking <code>CompletableFuture.runAsync(() -> actionToRun())</code>, but with the
