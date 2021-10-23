@@ -41,14 +41,29 @@ public class Promise<T> extends CompletableFuture<T> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Promise.class);
 
-	public static <T> CompletableFuture<T> none() {
+	public Promise() {}
+
+	public static <V> CompletableFuture<V> none() {
 
 		return completed(null);
+	}
+
+	public Promise<T> nil() {
+
+		complete(null);
+		return this;
 	}
 
 	public static <T> CompletableFuture<Optional<T>> empty() {
 
 		return completed(Optional.empty());
+	}
+
+	public static <V> Promise<Optional<V>> blank() {
+
+		Promise<Optional<V>> p = new Promise<>();
+		p.complete(Optional.empty());
+		return p;
 	}
 
 	public static <T> CompletableFuture<T> completed(T t) {
@@ -61,6 +76,12 @@ public class Promise<T> extends CompletableFuture<T> {
 		CompletableFuture<T> cf = new CompletableFuture<>();
 		cf.completeExceptionally(e);
 		return cf;
+	}
+
+	public Promise<T> abort(Throwable e) {
+
+		this.completeExceptionally(e);
+		return this;
 	}
 
 	/**
