@@ -17,6 +17,7 @@
  */
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PromiseTest {
 
 	@Test
-	void promiseRetryCancel() throws Exception {
+	void nil() throws Exception {
+
+		Promise<Void> p = new Promise<>();
+		p.nil();
+
+		assertNull(p.join());
+	}
+
+	@Test
+	void blank() throws Exception {
+
+		Promise<Optional<Object>> blank = Promise.blank();
+
+		assertFalse(blank.join().isPresent());
+	}
+
+	@Test
+	void abort() throws Throwable {
+
+		Promise<Void> p = new Promise<>();
+		p.abort(new NullPointerException());
+
+		assertThrows(CompletionException.class, () -> p.join());
+	}
+
+	@Test
+	public void promiseRetryCancel() throws Exception {
 
 		final int[] numFails = { 0 };
 		final int sleepMs = 500;
