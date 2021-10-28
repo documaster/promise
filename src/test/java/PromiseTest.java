@@ -295,6 +295,52 @@ class PromiseTest {
 		assertTrue(completed.isDone());
 	}
 
+	@Test
+	void thenObtain() throws Exception {
+
+		CompletableFuture<Integer> oneThousand =
+				CompletableFuture
+						.supplyAsync(() -> 1000)
+						.thenApply(res -> res + 1000) // ignore 2000 result
+						.thenApply(Promise.obtain(1000));
+
+		assertEquals(1000, oneThousand.join());
+
+		CompletableFuture<Object> nullCheck =
+				CompletableFuture
+						.supplyAsync(() -> 1000)
+						.thenApply(Promise.obtain(() -> null));
+
+		assertNull(nullCheck.join());
+
+		CompletableFuture<Object> supplierThousand =
+				CompletableFuture
+						.supplyAsync(() -> 1000)
+						.thenApply(res -> res + 1000)
+						.thenApply(Promise.obtain(() -> 1000));
+
+		assertEquals(1000, supplierThousand.join());
+
+		assertThrows(NullPointerException.class, () ->
+				CompletableFuture
+						.supplyAsync(() -> 1000)
+						.thenApply(res -> res + 1000)
+						.thenApply(Promise.obtain(null)));
+
+		CompletableFuture<Object> supplierRuntime =
+				CompletableFuture
+						.supplyAsync(() -> 1000)
+						.thenApply(res -> res + 1000)
+						.thenApply(Promise.obtain(() -> dummyRuntime()));
+
+		assertTrue(supplierRuntime.isCompletedExceptionally());
+	}
+
+	private int dummyRuntime() {
+
+		throw new RuntimeException("I'm a dummy runtime exception");
+	}
+
 	private void sleep(long millis) {
 
 		try {
