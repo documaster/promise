@@ -33,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PromiseTest {
+class PromiseTest {
 
 	@Test
-	public void promiseRetryCancel() throws Exception {
+	void promiseRetryCancel() throws Exception {
 
 		final int[] numFails = { 0 };
 		final int sleepMs = 500;
@@ -60,7 +60,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void promiseRetry() throws Exception {
+	void promiseRetry() throws Exception {
 
 		final int[] numFails = { 2 };
 
@@ -92,19 +92,19 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void none() throws Exception {
+	void none() throws Exception {
 
 		assertNull(Promise.none().join());
 	}
 
 	@Test
-	public void empty() throws Exception {
+	void empty() throws Exception {
 
 		assertEquals(Promise.empty().join(), Optional.empty());
 	}
 
 	@Test
-	public void completed() throws Exception {
+	void completed() throws Exception {
 
 		assertEquals(Promise.completed(100).join(), 100);
 		Supplier<Integer> s = () -> { return 1000; };
@@ -113,7 +113,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void fail() throws Exception {
+	void fail() throws Exception {
 
 		Throwable ex = new Throwable("Error");
 		CompletableFuture<Object> fail = Promise.fail(ex);
@@ -123,7 +123,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void runUntil() throws Exception {
+	void runUntil() throws Exception {
 
 		final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
@@ -140,7 +140,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void runAtMostUntil() throws Exception {
+	void runAtMostUntil() throws Exception {
 
 		final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
@@ -166,7 +166,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void delay() throws Exception {
+	void delay() throws Exception {
 
 		final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
@@ -184,7 +184,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void delaySupplier() throws Exception {
+	void delaySupplier() throws Exception {
 
 		final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
@@ -204,7 +204,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void runBothThenApply() throws Exception {
+	void runBothThenApply() throws Exception {
 
 		AtomicInteger sum = new AtomicInteger(0);
 
@@ -229,7 +229,7 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void runBothSuppliersThenApply() throws Exception {
+	void runBothSuppliersThenApply() throws Exception {
 
 		AtomicInteger sum = new AtomicInteger(0);
 
@@ -251,12 +251,21 @@ public class PromiseTest {
 	}
 
 	@Test
-	public void throwNPE() throws Throwable {
+	void throwNPE() throws Throwable {
 
 		assertThrows(NullPointerException.class, () -> {
 
 			Promise.runUntil(null, 1000, null, null);
 		});
+	}
+
+	@Test
+	void run() throws Exception {
+
+		CompletableFuture<Integer> cf = Promise.completed(1000);
+		CompletableFuture<Void> completed = Promise.run(cf);
+		completed.join();
+		assertTrue(completed.isDone());
 	}
 
 	private void sleep(long millis) {
