@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -82,6 +83,45 @@ public class Promise<T> extends CompletableFuture<T> {
 
 		this.completeExceptionally(e);
 		return this;
+	}
+
+	/**
+	 * Return a {@link Function} that would ignore the input parameter and just return the result of its call.
+	 *
+	 * This would be useful when you don't want to call {@link #thenApply(Function)} and ignore the input parameter
+	 * by writing <code>aVoid</code> or <code>dummy</code>. The end result would be a static call that would clearly
+	 * state what the obtained value is wished. This action shall be automatically chained to the completion stage
+	 * stack.
+	 *
+	 * If the return function throws an exception, then the chain completes exceptionally as well.
+	 *
+	 * @param input The input to return as a {@link Function}
+	 * @return A function of the supplied desired return type
+	 */
+	public static <T, R> Function<T, R> obtain(R input) {
+
+		return ignoreMe -> input;
+	}
+
+	/**
+	 * Return a {@link Function} that would ignore the input parameter and just return the result of its call.
+	 *
+	 * This would be useful when you don't want to call {@link #thenApply(Function)} and ignore the input parameter
+	 * by writing <code>aVoid</code> or <code>dummy</code>. The end result would be a static call that would clearly
+	 * state what the obtained value is wished. This action shall be automatically chained to the completion stage
+	 * stack.
+	 *
+	 * If the supplied function throws an exception, then the chain completes exceptionally as well and can be
+	 * further chained with {@link #whenComplete(BiConsumer)} or {@link #exceptionally(Function)}.
+	 *
+	 * @param supplier The passed supplier function to retrieve a result from
+	 * @return A function of the supplied desired return type
+	 */
+	public static <T, R> Function<T, R> obtain(@NotNull Supplier<R> supplier) {
+
+		if (supplier == null)
+			throw new NullPointerException("Passed supplier must not be null");
+		return ignoreMe -> supplier.get();
 	}
 
 	/**
